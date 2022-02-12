@@ -1,0 +1,29 @@
+---
+- hosts: all 
+  vars_prompt:
+    - name: input
+      prompt: "Please enter insert or delete to add key1=value1 in config.properties"
+      private: false
+  tasks:
+    - name: check if key1=value1 is already defined
+      lineinfile:
+        state: absent 
+        path: "/home/<user>/config.properties"
+        regexp: "^key1="
+      check_mode: true 
+      changed_when: false
+      register: check
+
+    - name: Define key1=value1 if not defined
+      lineinfile: 
+         state: present 
+         path: "/home/<user>/config.properties"
+         line: "key1=value1"
+      when: check.found == 0 and input == "insert"
+
+    - name: Define key1=value1 if not defined
+      lineinfile: 
+         state: absent  
+         path: "/home/<user>/config.properties"
+         line: "key1=value1"
+      when: input == "delete"
